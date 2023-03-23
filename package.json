@@ -39,7 +39,7 @@
     "ts-node": "^8.10.2",
     "typescript": "^3.9.7",
     "webpack": "^5.76.3",
-    "webpack-cli": "^3.3.12"
+    "webpack-cli": "^5.0.0"
   },
   "files": [
     "package.json",
@@ -57,7 +57,7 @@
     "url": "https://github.com/shibayu36/merged-pr-stat.git"
   },
   "scripts": {
-    "build": "webpack --silent",
+    "build": "webpack",
     "exec": "npm run --silent build && node dist/index.js",
     "lint": "eslint . --ext 'ts,js'",
     "lint:fix": "eslint . --fix --ext 'ts,js'",
