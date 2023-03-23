@@ -13,7 +13,7 @@ export async function logCommand(options: LogCommandOptions): Promise<void> {
   if (options.format === "json") {
     process.stdout.write(JSON.stringify(prs, undefined, 2));
   } else if (options.format === "csv") {
-    process.stdout.write(csvStringify(prs, { header: true }));
+    process.stdout.write(csvStringify(prs, { header: true, delimiter: "\t" }));
   } else {
     console.error("--format can be csv or json only");
     process.exit(1);
