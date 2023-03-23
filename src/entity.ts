@@ -3,6 +3,7 @@ import { parseISO } from "date-fns";
 export class PullRequest {
   public leadTimeSeconds: number;
   public timeToMergeSeconds: number;
+  public commitToPRSeconds: number;
   public timeToMergeFromFirstReviewSeconds: number | undefined;
 
   constructor(
@@ -19,6 +20,7 @@ export class PullRequest {
     const mergedAtMillis = parseISO(this.mergedAt).getTime();
     this.leadTimeSeconds = (mergedAtMillis - parseISO(this.authoredDate).getTime()) / 1000;
     this.timeToMergeSeconds = (mergedAtMillis - parseISO(this.createdAt).getTime()) / 1000;
+    this.commitToPRSeconds = (parseISO(this.createdAt).getTime() - parseISO(this.authoredDate).getTime()) / 1000;
     this.timeToMergeFromFirstReviewSeconds = this.firstReviewedAt
       ? (mergedAtMillis - parseISO(this.firstReviewedAt).getTime()) / 1000
       : undefined;
