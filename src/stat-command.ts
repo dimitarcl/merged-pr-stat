@@ -10,6 +10,36 @@ interface StatCommandOptions {
   end: string | undefined;
   query: string | undefined;
 }
+
+let statNames = [
+    "count",
+    "authorCount",
+    "additionsAverage",
+    "additionsMedian",
+    "deletionsAverage",
+    "deletionsMedian",
+    "leadTimeSecondsAverage",
+    "leadTimeSecondsMedian",
+    "leadTimeSecondsDeviation",
+    "leadTimeSeconds80",
+    "leadTimeSeconds90",
+    "timeToMergeSecondsAverage",
+    "timeToMergeSecondsMedian",
+    "timeToMergeSecondsDeviation",
+    "timeToMergeSeconds80",
+    "timeToMergeSeconds90",
+    "timeToMergeFromFirstReviewSecondsAverage",
+    "timeToMergeFromFirstReviewSecondsMedian",
+    "timeToMergeFromFirstReviewSecondsDeviation",
+    "timeToMergeFromFirstReviewSeconds80",
+    "timeToMergeFromFirstReviewSeconds90",
+    "commitToPRSecondsAverage",
+    "commitToPRSecondsMedian",
+    "commitToPRSecondsDeviation",
+    "commitToPRSeconds80",
+    "commitToPRSeconds90",
+];
+
 export async function statCommand(options: StatCommandOptions): Promise<void> {
   let prs: PullRequest[] = [];
 
@@ -22,7 +52,10 @@ export async function statCommand(options: StatCommandOptions): Promise<void> {
     process.exit(1);
   }
 
-  process.stdout.write(JSON.stringify(createStat(prs), undefined, 2));
+  let stats = createStat(prs) as any;
+  process.stdout.write(statNames.join("\t") + "\n");
+  let values = statNames.map((n) => stats[n]);
+  process.stdout.write(values.join("\t") + "\n");
 }
 
 interface PullRequestStat {
