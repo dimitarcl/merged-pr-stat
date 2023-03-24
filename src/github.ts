@@ -40,6 +40,8 @@ interface PullRequestNode {
   mergedAt: string;
   additions: number;
   deletions: number;
+  changedFiles: number;
+  totalCommentsCount: number;
   commits: {
     nodes: {
       commit: {
@@ -70,8 +72,10 @@ async function fetchAllPullRequestsByQuery(searchQuery: string): Promise<PullReq
             mergedAt
             additions
             deletions
+            changedFiles
+            totalCommentsCount
             # for lead time
-            commits(first:1) {
+            commits(first:100) {
               nodes {
                 commit {
                   authoredDate
@@ -79,7 +83,7 @@ async function fetchAllPullRequestsByQuery(searchQuery: string): Promise<PullReq
               }
             }
             # for time to merge from review
-            reviews(first:1) {
+            reviews(first:100) {
               nodes {
                 ... on PullRequestReview {
                   createdAt
@@ -119,7 +123,11 @@ async function fetchAllPullRequestsByQuery(searchQuery: string): Promise<PullReq
             p.additions,
             p.deletions,
             p.commits.nodes[0].commit.authoredDate,
-            p.reviews.nodes[0] ? p.reviews.nodes[0].createdAt : undefined
+            p.reviews.nodes[0] ? p.reviews.nodes[0].createdAt : undefined,
+            p.commits.nodes.length,
+            p.reviews.nodes.length,
+            p.totalCommentsCount,
+            p.changedFiles,
           )
       )
     );

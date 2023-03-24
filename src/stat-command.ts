@@ -148,7 +148,11 @@ export function createPullRequestsByLog(path: string): PullRequest[] {
         p.additions,
         p.deletions,
         p.authoredDate,
-        p.firstReviewedAt
+        p.firstReviewedAt,
+        p.commits,
+        p.reviews,
+        p.comments,
+        p.changedFiles,
       )
   );
 }
