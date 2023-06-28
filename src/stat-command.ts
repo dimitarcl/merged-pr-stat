@@ -85,11 +85,23 @@ interface PullRequestStat {
   commitToPRSecondsDeviation: number;
   commitToPRSeconds80: number;
   commitToPRSeconds90: number;
+  firstApproveSecondsAverage: number;
+  firstApproveSecondsMedian: number;
+  firstApproveSecondsDeviation: number;
+  firstApproveSeconds80: number;
+  firstApproveSeconds90: number;
+  lastApproveSecondsAverage: number;
+  lastApproveSecondsMedian: number;
+  lastApproveSecondsDeviation: number;
+  lastApproveSeconds80: number;
+  lastApproveSeconds90: number;
 }
 export function createStat(prs: PullRequest[]): PullRequestStat {
   const leadTimes = prs.map((pr) => pr.leadTimeSeconds);
   const timeToMerges = prs.map((pr) => pr.timeToMergeSeconds);
   const commitToPRs = prs.map((pr) => pr.commitToPRSeconds);
+  const firstApproves = prs.map((pr) => pr.timeToFirstApprove).filter((x): x is number => x !== undefined);
+  const lastApproves = prs.map((pr) => pr.timeToLastApprove).filter((x): x is number => x !== undefined);
   const timeToMergeFromFirstReviews = prs
     .map((pr) => pr.timeToMergeFromFirstReviewSeconds)
     .filter((x): x is number => x !== undefined);
@@ -121,6 +133,16 @@ export function createStat(prs: PullRequest[]): PullRequestStat {
     commitToPRSecondsDeviation: Math.floor(std_deviation(commitToPRs)),
     commitToPRSeconds80: Math.floor(quantileSeq(commitToPRs, 0.8) as number),
     commitToPRSeconds90: Math.floor(quantileSeq(commitToPRs, 0.9) as number),
+    firstApproveSecondsAverage: Math.floor(average(firstApproves)),
+    firstApproveSecondsMedian: Math.floor(median(firstApproves)),
+    firstApproveSecondsDeviation: Math.floor(std_deviation(firstApproves)),
+    firstApproveSeconds80: Math.floor(quantileSeq(firstApproves, 0.8) as number),
+    firstApproveSeconds90: Math.floor(quantileSeq(firstApproves, 0.9) as number),
+    lastApproveSecondsAverage: Math.floor(average(lastApproves)),
+    lastApproveSecondsMedian: Math.floor(median(lastApproves)),
+    lastApproveSecondsDeviation: Math.floor(std_deviation(lastApproves)),
+    lastApproveSeconds80: Math.floor(quantileSeq(lastApproves, 0.8) as number),
+    lastApproveSeconds90: Math.floor(quantileSeq(lastApproves, 0.9) as number),
   };
 }
 
@@ -149,6 +171,8 @@ export function createPullRequestsByLog(path: string): PullRequest[] {
         p.deletions,
         p.authoredDate,
         p.firstReviewedAt,
+        p.firstApprove,
+        p.lastApprove,
         p.commits,
         p.reviews,
         p.comments,

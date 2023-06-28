@@ -52,8 +52,23 @@ interface PullRequestNode {
   reviews: {
     nodes: {
       createdAt: string;
+      state: string;
     }[];
   };
+}
+
+function firstApprove(reviews:any[]):string | undefined {
+    let first = reviews.find((r) => r.state == 'APPROVED')
+    return first? first.createdAt : undefined;
+}
+
+function lastApprove(reviews:any[]):string | undefined {
+    for (let i = reviews.length - 1; i >= 0; --i)
+    {
+        let r = reviews[i];
+        if (r.state == 'APPROVED') return r.createdAt;
+    }
+    return undefined;
 }
 
 async function fetchAllPullRequestsByQuery(searchQuery: string): Promise<PullRequest[]> {
@@ -87,6 +102,7 @@ async function fetchAllPullRequestsByQuery(searchQuery: string): Promise<PullReq
               nodes {
                 ... on PullRequestReview {
                   createdAt
+                  state
                 }
               }
             }
@@ -122,8 +138,10 @@ async function fetchAllPullRequestsByQuery(searchQuery: string): Promise<PullReq
             p.mergedAt,
             p.additions,
             p.deletions,
-            p.commits.nodes[0].commit.authoredDate,
+            p.commits.nodes[0] ? p.commits.nodes[0].commit.authoredDate : p.createdAt,
             p.reviews.nodes[0] ? p.reviews.nodes[0].createdAt : undefined,
+            p.reviews.nodes.length ? firstApprove(p.reviews.nodes) : undefined,
+            p.reviews.nodes.length ? lastApprove(p.reviews.nodes) : undefined,
             p.commits.nodes.length,
             p.reviews.nodes.length,
             p.totalCommentsCount,

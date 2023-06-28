@@ -6,6 +6,8 @@ export class PullRequest {
   public commitToPRSeconds: number;
   public timeToMergeFromFirstReviewSeconds: number | undefined;
   public timeToFirstReviewSeconds: number | undefined;
+  public timeToFirstApprove: number | undefined;
+  public timeToLastApprove: number | undefined;
 
   constructor(
     public title: string,
@@ -15,8 +17,10 @@ export class PullRequest {
     public mergedAt: string,
     public additions: number,
     public deletions: number,
-    public authoredDate: string,
+    public authoredDate: string, 
     public firstReviewedAt: string | undefined,
+    public firstApprove: string | undefined,
+    public lastApprove: string | undefined,
     public commits: number,
     public reviews: number,
     public comments: number,
@@ -35,5 +39,18 @@ export class PullRequest {
         this.timeToMergeFromFirstReviewSeconds = undefined;
         this.timeToFirstReviewSeconds = undefined;
     }
+    if (this.firstApprove) {
+        const firstApproveMS = parseISO(this.firstApprove).getTime();
+        this.timeToFirstApprove = (firstApproveMS - createdAtMillis) / 1000;
+    } else {
+        this.timeToFirstApprove = undefined;
+    }
+    if (this.lastApprove) {
+        const lastApproveMS = parseISO(this.lastApprove).getTime();
+        this.timeToLastApprove = (lastApproveMS - createdAtMillis) / 1000;
+    } else {
+        this.timeToLastApprove = undefined;
+    }
+
   }
 }
