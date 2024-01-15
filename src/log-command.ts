@@ -8,12 +8,12 @@ interface LogCommandOptions {
   format: string;
 }
 export async function logCommand(options: LogCommandOptions): Promise<void> {
-  const prs = await fetchAllMergedPullRequests(options.query, options.start, options.end);
+  const [prs, reviews] = await fetchAllMergedPullRequests(options.query, options.start, options.end);
 
   if (options.format === "json") {
     process.stdout.write(JSON.stringify(prs, undefined, 2));
   } else if (options.format === "csv") {
-    process.stdout.write(csvStringify(prs, { header: true, delimiter: "\t" }));
+    process.stdout.write(csvStringify(reviews, { header: true, delimiter: "\t" }));
   } else {
     console.error("--format can be csv or json only");
     process.exit(1);

@@ -1,5 +1,5 @@
 import { GraphQLClient, gql } from "graphql-request";
-import { PullRequest } from "./entity";
+import { PullRequest, PullRequestReview } from "./entity";
 import { parseISO } from "date-fns";
 
 // GitHub.com https://api.github.com/graphql
@@ -18,7 +18,7 @@ export async function fetchAllMergedPullRequests(
   searchQuery: string,
   startDateString?: string,
   endDateString?: string
-): Promise<PullRequest[]> {
+): Promise<[PullRequest[], PullRequestReview[]]> {
   const startDate = startDateString ? parseISO(startDateString).toISOString() : "";
   const endDate = endDateString ? parseISO(endDateString).toISOString() : "";
 
@@ -53,6 +53,10 @@ interface PullRequestNode {
     nodes: {
       createdAt: string;
       state: string;
+      author: {
+          login: string;
+      } | null;
+      url: string;
     }[];
   };
 }
@@ -71,7 +75,7 @@ function lastApprove(reviews:any[]):string | undefined {
     return undefined;
 }
 
-async function fetchAllPullRequestsByQuery(searchQuery: string): Promise<PullRequest[]> {
+async function fetchAllPullRequestsByQuery(searchQuery: string): Promise<[PullRequest[], PullRequestReview[]]> {
   const query = gql`
     query($after: String) {
       search(type: ISSUE, first: 100, query: "${searchQuery}", after: $after) {
@@ -103,6 +107,10 @@ async function fetchAllPullRequestsByQuery(searchQuery: string): Promise<PullReq
                 ... on PullRequestReview {
                   createdAt
                   state
+                  url
+                  author {
+                    login
+                  }
                 }
               }
             }
@@ -123,6 +131,7 @@ async function fetchAllPullRequestsByQuery(searchQuery: string): Promise<PullReq
   `;
 
   let after: string | undefined;
+  let reviews: PullRequestReview[] = [];
   let prs: PullRequest[] = [];
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -130,7 +139,25 @@ async function fetchAllPullRequestsByQuery(searchQuery: string): Promise<PullReq
     prs = prs.concat(
       data.search.nodes.map(
         (p: PullRequestNode) =>
-          new PullRequest(
+        {
+          let reviewCount = p.reviews.nodes.length;
+          for (let i = 0; i < reviewCount; ++i)
+          {
+              reviews.push(new PullRequestReview(
+                  p.title,
+                  p.author ? p.author.login : "undefined",
+                  p.url,
+                  p.createdAt,
+                  p.mergedAt,
+                  p.totalCommentsCount,
+                  p.changedFiles,
+                  p.reviews.nodes[i].author ? p.reviews.nodes[i].author!.login : "undefined",
+                  p.reviews.nodes[i].url,
+                  p.reviews.nodes[i].createdAt,
+                  p.reviews.nodes[i].state,
+              ));
+          }
+          return new PullRequest(
             p.title,
             p.author ? p.author.login : undefined,
             p.url,
@@ -146,7 +173,8 @@ async function fetchAllPullRequestsByQuery(searchQuery: string): Promise<PullReq
             p.reviews.nodes.length,
             p.totalCommentsCount,
             p.changedFiles,
-          )
+          );
+        }
       )
     );
 
@@ -157,5 +185,5 @@ async function fetchAllPullRequestsByQuery(searchQuery: string): Promise<PullReq
     after = data.search.pageInfo.endCursor;
   }
 
-  return prs;
+  return [prs, reviews];
 }

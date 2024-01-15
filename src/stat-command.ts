@@ -44,7 +44,7 @@ export async function statCommand(options: StatCommandOptions): Promise<void> {
   let prs: PullRequest[] = [];
 
   if (options.query) {
-    prs = await fetchAllMergedPullRequests(options.query, options.start, options.end);
+    prs = (await fetchAllMergedPullRequests(options.query, options.start, options.end))[0];
   } else if (options.input) {
     prs = createPullRequestsByLog(options.input);
   } else {

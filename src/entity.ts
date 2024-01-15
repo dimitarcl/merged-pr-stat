@@ -54,3 +54,21 @@ export class PullRequest {
 
   }
 }
+
+export class PullRequestReview {
+  constructor(
+    public title: string,
+    public pr_author: string,
+    public pr_url: string,
+    public pr_createdAt: string,
+    public pr_mergedAt: string,
+    public comments: number,
+    public changedFiles: number,
+    public author: string,
+    public url: string,
+    public createdAt: string,
+    public state: string,
+  )
+  {
+  }
+}
