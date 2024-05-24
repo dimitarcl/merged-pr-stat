@@ -177,6 +177,7 @@ export function createPullRequestsByLog(path: string): PullRequest[] {
         p.reviews,
         p.comments,
         p.changedFiles,
+        "",
       )
   );
 }

@@ -32,6 +32,7 @@ export async function fetchAllMergedPullRequests(
 
 interface PullRequestNode {
   title: string;
+  body: string;
   author: {
     login: string;
   } | null;
@@ -45,6 +46,7 @@ interface PullRequestNode {
   commits: {
     nodes: {
       commit: {
+        message: string;
         authoredDate: string;
       };
     }[];
@@ -75,6 +77,25 @@ function lastApprove(reviews:any[]):string | undefined {
     return undefined;
 }
 
+function getTask(pull: PullRequestNode): string {
+    const task_re = /(?:(?:COH)|(?:SUP))-[0-9]+/;
+    let match = task_re.exec(pull.title);
+    if (match) {
+        return match[0];
+    }
+    match = task_re.exec(pull.body);
+    if (match) {
+        return match[0];
+    }
+    for (let commit of pull.commits.nodes) {
+        match = task_re.exec(commit.commit.message);
+        if (match) {
+            return match[0];
+        }
+    }
+    return "";
+}
+
 async function fetchAllPullRequestsByQuery(searchQuery: string): Promise<[PullRequest[], PullRequestReview[]]> {
   const query = gql`
     query($after: String) {
@@ -83,6 +104,7 @@ async function fetchAllPullRequestsByQuery(searchQuery: string): Promise<[PullRe
         nodes {
           ... on PullRequest {
             title
+            body
             author {
               login
             }
@@ -97,6 +119,7 @@ async function fetchAllPullRequestsByQuery(searchQuery: string): Promise<[PullRe
             commits(first:100) {
               nodes {
                 commit {
+                  message
                   authoredDate
                 }
               }
@@ -173,6 +196,7 @@ async function fetchAllPullRequestsByQuery(searchQuery: string): Promise<[PullRe
             p.reviews.nodes.length,
             p.totalCommentsCount,
             p.changedFiles,
+            getTask(p),
           );
         }
       )

@@ -25,6 +25,7 @@ export class PullRequest {
     public reviews: number,
     public comments: number,
     public changedFiles: number,
+    public task: string,
   ) {
     const mergedAtMillis = parseISO(this.mergedAt).getTime();
     const createdAtMillis = parseISO(this.createdAt).getTime();
